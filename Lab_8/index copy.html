@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Assignment 8 part 1</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width initial-scale=1.0" />
+
+    <!-- Leaflet CSS & JS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+      crossorigin=""
+    ></script>
+
+    <!-- Leaflet Slider and Fuse Search -->
+    <script src="https://dsps.lib.uiowa.edu/placing/public/leafletSlider-1.0.2/leaflet.SliderControl.min.js"></script>
+    <script src="https://dsps.lib.uiowa.edu/placing/public/fuse-1.2.1/fuse.min.js"></script>
+    <script src="https://dsps.lib.uiowa.edu/placing/public/leafletFuseSearch-noVersion/leafletfuse.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://dsps.lib.uiowa.edu/placing/public/leafletFuseSearch-noVersion/leafletfuse.css"
+      type="text/css"
+    />
+
+    <!-- jQuery and jQuery UI -->
+    <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css"
+      type="text/css"
+    />
+    <script src="https://dsps.lib.uiowa.edu/placing/public/jqueryUiTouchPunch-0.2.2/jquery.ui.touch-punch.min.js"></script>
+
+    <!-- GeoJSON Data Script -->
+    <script src="https://raw.githubusercontent.com/xinruixie/xinruixie.github.io/main/Lab_8/new.js"></script>
+
+    <!-- Custom Styles -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://dsps.lib.uiowa.edu/placing/css/style.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://dsps.lib.uiowa.edu/placing/css/navwrap.css"
+    />
+  </head>
+  <body>
+    <div id="map" style="width: 100%; height: 650px"></div>
+    <script>
+      var basemap = L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}",
+        {
+          attribution: "Tiles &copy; Esri &mdash; Source: Esri",
+          maxZoom: 13,
+        }
+      );
+
+      var map = L.map("map", {
+        center: [41.401397, -92.354629],
+        zoom: 15,
+        layers: [basemap],
+      });
+
+      var onEachFeature = function (feature, layer) {
+        if (feature.properties) {
+          var prop = feature.properties;
+          var popup =
+            "<h3>" +
+            prop["name"] +
+            "<strong>Coordinate: </strong>" +
+            prop["latitude"] +
+            " " +
+            prop["longitude"] +
+            "<br><strong>Time: </strong>" +
+            prop["time"];
+          layer.bindPopup(popup, { maxWidth: "auto" });
+        }
+      };
+
+      var blueCircleMarkers = {
+        radius: 4,
+        fillColor: "#00AEEF",
+        color: "#3978BF",
+        weight: 1,
+        opacity: 0.8,
+        fillOpacity: 0.5,
+      };
+      var orangeCircleMarkers = {
+        radius: 5,
+        fillColor: "#ED1C24",
+        color: "#ED1C24",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.7,
+      };
+      var greenCircleMarkers = {
+        radius: 5,
+        fillColor: "#ffff00",
+        color: "#286933",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.7,
+      };
+
+      var firstlayer = L.geoJson(data, {
+        onEachFeature: onEachFeature,
+        pointToLayer: function (feature, latlng) {
+          return L.circleMarker(latlng, blueCircleMarkers);
+        },
+      }).addTo(map);
+
+      var timelineLayer = L.geoJson(data, {
+        onEachFeature: onEachFeature,
+        pointToLayer: function (feature, latlng) {
+          return L.circleMarker(latlng, orangeCircleMarkers);
+        },
+      });
+
+      var searchLayer = L.geoJson(data, {
+        onEachFeature: onEachFeature,
+        pointToLayer: function (feature, latlng) {
+          return L.circleMarker(latlng, greenCircleMarkers);
+        },
+      });
+
+      var sliderControl = L.control.sliderControl({
+        position: "topright",
+        layer: timelineLayer,
+        timeAttribute: "time",
+        range: true,
+      });
+
+      map.addControl(sliderControl);
+      sliderControl.startSlider();
+
+      var searchControl = L.control.fuseSearch({
+        position: "topleft",
+        title: "Search",
+        placeholder: "Search by name...",
+        maxResultLength: 10,
+        caseSensitive: false,
+        showInvisibleFeatures: true,
+        layerToToggle: searchLayer,
+        threshold: 0.5,
+        inputName: "name", // Set the attribute name to search
+        showResultFct: function (feature, container) {
+          var props = feature.properties;
+          var name = L.DomUtil.create("b", null, container);
+          name.innerHTML = props.name;
+          container.appendChild(L.DomUtil.create("br", null, container));
+        },
+      });
+
+      map.addControl(searchControl);
+
+      var overlays = {
+        "First Layer": firstlayer,
+      };
+
+      var baseMaps = {
+        "Base Map": basemap,
+      };
+
+      L.control.layers(overlays, baseMaps, { collapsed: false }).addTo(map);
+
+      var myIcon = L.icon({
+        iconUrl: "my-icon.png",
+        iconRetinaUrl: "my-icon@2x.png",
+        iconSize: [1, 1],
+        iconAnchor: [1, 1],
+        popupAnchor: [-1, -1],
+      });
+    </script>
+  </body>
+</html>
