@@ -1,4 +1,4 @@
-var data = [
+var gdata = [
   {
     "name": "Masonic Opera House: What Cheer, IA",
     "latitude": 41.401397,
