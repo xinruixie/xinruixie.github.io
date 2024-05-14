@@ -12838,5 +12838,5 @@ var gdata = [
       time: "12/18/1908",
     },
     geometry: { type: "Point", coordinates: [-92.093089, 41.198372] },
-  },
+  }
 ];
