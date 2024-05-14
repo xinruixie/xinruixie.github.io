@@ -12839,4 +12839,4 @@ var gdata = [
     },
     geometry: { type: "Point", coordinates: [-92.093089, 41.198372] },
   },
-]
+];
